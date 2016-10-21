@@ -4,15 +4,19 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Text;
 
 import java.io.File;
-import java.io.FilenameFilter;
-import java.nio.file.Files;
+//import java.io.FilenameFilter;
+//import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.io.filefilter.RegexFileFilter;
 import org.eclipse.swt.SWT;
@@ -32,11 +36,12 @@ public class MainWindow {
 	private Text pattern;
 	private Text extension1;
 	
-	private String ext1 = "txt", ext2 = "txt";
+	private String ext1 = "\\.txt", ext2 = "\\.txt";
     private List<String> files1String = new ArrayList<String>();
     private List<String> files2String = new ArrayList<String>();
     private Boolean ignoreTextChanged = false;
-    private String pattern_ = ".*?\\.(.*)";
+    private String pattern_;
+    
     private Label label3;
     private Label count1;
     private Text file2;
@@ -66,7 +71,6 @@ public class MainWindow {
     private Label countInBoth;
     private Label countOnlyA;
     private Label countOnlyB;
-
 
 	/**
 	 * Launch the application.
@@ -135,6 +139,28 @@ public class MainWindow {
 		pattern.setBounds(70, 42, 212, 20);
 		
 		Button match = new Button(shlListez, SWT.NONE);
+		match.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				pattern_ = pattern.getText();
+				if (files1String != null)
+	            {	                
+	                files2String = new ArrayList<String> ();
+	                for (String s : files1String) {
+	                	Pattern r = Pattern.compile(pattern_);	                    
+	                    Matcher m = r.matcher(s);
+	                    if (m.find()) {
+	                    	files2String.add(m.group(1));
+	                    }
+	                }
+	                
+	                ignoreTextChanged = true;
+	                file2.setText(String.join("\n", files2String));
+	                ignoreTextChanged = false;	                
+	                count2.setText(Integer.toString(files2String.size()));
+	            }
+			}
+		});
 		match.setFont(SWTResourceManager.getFont(".SF NS Text", 10, SWT.NORMAL));
 		match.setBounds(293, 42, 59, 20);
 		match.setText("match");
@@ -144,6 +170,17 @@ public class MainWindow {
 		label4.setText("extension:");
 		
 		extension1 = new Text(shlListez, SWT.BORDER);
+		extension1.addModifyListener(new ModifyListener() {
+			public void modifyText(ModifyEvent arg0) {
+				if (extension1.getText().equals(""))
+	                ext1 = "";
+	            else
+	                ext1 = "\\." + extension1.getText();
+	            ignoreTextChanged = true;
+	            files1String = getFilesGivenDir(path1, file1, files1String, count1, ext1);            
+	            ignoreTextChanged = false;
+			}
+		});
 		extension1.setText("txt");
 		extension1.setBounds(88, 68, 40, 20);
 		
@@ -158,6 +195,7 @@ public class MainWindow {
 		file2 = new Text(shlListez, SWT.MULTI | SWT.BORDER | SWT.WRAP | SWT.V_SCROLL);
 		file2.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent arg0) {
+				if (ignoreTextChanged) return;
 				if (file2.getText() == null)
 	            {
 	                compare.setText("check dups in (a)");
@@ -172,8 +210,7 @@ public class MainWindow {
 	                inBothLabel.setText("In both:");
 	                onlyInALabel.setText("Only in (a):");
 	                onlyInBLabel.setText("Only in (b):");
-	            }
-				if (ignoreTextChanged) return;
+	            }				
 				files2String = changeFilesByTyping(file2, files2String, count2);
 			}
 		});
@@ -212,26 +249,86 @@ public class MainWindow {
 		field.setBounds(440, 43, 40, 20);
 		
 		extractField = new Button(shlListez, SWT.NONE);
+		extractField.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {		                   
+				int field_;
+				try {
+					field_ = Integer.parseInt(field.getText());
+					if (field_ == 0)
+	                    return;
+					ArrayList<String> tmp = new ArrayList<String> ();
+					for (String s : files2String) {
+						if (s.equals("")) continue;						
+						String[] fields = s.split("\t");
+						if (fields.length >= field_) {
+							tmp.add(fields[field_-1]);
+						}
+						else
+							tmp.add(s);
+					}
+					files2String = tmp;
+				}
+				catch (Exception ex) {}
+		            
+				ignoreTextChanged = true;
+				file2.setText(String.join("\n", files2String));
+				ignoreTextChanged = false;
+				
+		        }                		       			
+		});
 		extractField.setText("extract field");
 		extractField.setFont(SWTResourceManager.getFont(".SF NS Text", 10, SWT.NORMAL));
 		extractField.setBounds(486, 43, 90, 20);
 		
 		noPath1 = new Button(shlListez, SWT.NONE);
+		noPath1.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				ignoreTextChanged = true;
+				files1String = getFileNames(file1, files1String);                
+	            ignoreTextChanged = false;
+			}
+		});
 		noPath1.setText("no path");
 		noPath1.setFont(SWTResourceManager.getFont(".SF NS Text", 9, SWT.NORMAL));
 		noPath1.setBounds(129, 68, 60, 20);
 		
 		basename1 = new Button(shlListez, SWT.NONE);
+		basename1.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				ignoreTextChanged = true;
+				files1String = getBasenames(file1, files1String);     
+	            ignoreTextChanged = false;
+			}
+		});
 		basename1.setText("basename");
 		basename1.setFont(SWTResourceManager.getFont(".SF NS Text", 9, SWT.NORMAL));
 		basename1.setBounds(184, 68, 70, 20);
 		
 		sort1 = new Button(shlListez, SWT.NONE);
+		sort1.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				ignoreTextChanged = true;
+				files1String = sortFiles(file1, files1String);
+	            ignoreTextChanged = false;
+			}
+		});
 		sort1.setText("sort");
 		sort1.setFont(SWTResourceManager.getFont(".SF NS Text", 9, SWT.NORMAL));
 		sort1.setBounds(249, 68, 52, 20);
 		
 		uniq1 = new Button(shlListez, SWT.NONE);
+		uniq1.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				ignoreTextChanged = true;
+				files1String = uniqFiles(file1, files1String, count1);
+	            ignoreTextChanged = false;
+			}
+		});
 		uniq1.setText("uniq");
 		uniq1.setFont(SWTResourceManager.getFont(".SF NS Text", 9, SWT.NORMAL));
 		uniq1.setBounds(296, 68, 56, 20);
@@ -296,25 +393,68 @@ public class MainWindow {
 		label5.setBounds(377, 74, 55, 13);
 		
 		extension2 = new Text(shlListez, SWT.BORDER);
+		extension2.addModifyListener(new ModifyListener() {
+			public void modifyText(ModifyEvent arg0) {
+				if (extension2.getText().equals(""))
+	                ext2 = "";
+	            else
+	                ext2 = "\\." + extension2.getText();
+	            ignoreTextChanged = true;
+	            files2String = getFilesGivenDir(path2, file2, files2String, count2, ext2);            
+	            ignoreTextChanged = false;
+			}
+		});
 		extension2.setText("txt");
 		extension2.setBounds(438, 71, 40, 20);
 		
 		noPath2 = new Button(shlListez, SWT.NONE);
+		noPath2.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				ignoreTextChanged = true;
+				files2String = getFileNames(file2, files2String);                
+	            ignoreTextChanged = false;
+			}
+		});
 		noPath2.setText("no path");
 		noPath2.setFont(SWTResourceManager.getFont(".SF NS Text", 9, SWT.NORMAL));
 		noPath2.setBounds(479, 71, 60, 20);
 		
 		basename2 = new Button(shlListez, SWT.NONE);
+		basename2.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				ignoreTextChanged = true;
+				files2String = getBasenames(file2, files2String);     
+	            ignoreTextChanged = false;
+			}
+		});
 		basename2.setText("basename");
 		basename2.setFont(SWTResourceManager.getFont(".SF NS Text", 9, SWT.NORMAL));
 		basename2.setBounds(534, 71, 70, 20);
 		
 		sort2 = new Button(shlListez, SWT.NONE);
+		sort2.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				ignoreTextChanged = true;
+				files2String = sortFiles(file2, files2String);
+	            ignoreTextChanged = false;
+			}
+		});
 		sort2.setText("sort");
 		sort2.setFont(SWTResourceManager.getFont(".SF NS Text", 9, SWT.NORMAL));
 		sort2.setBounds(599, 71, 52, 20);
 		
 		uniq2 = new Button(shlListez, SWT.NONE);
+		uniq2.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				ignoreTextChanged = true;
+				files2String = uniqFiles(file2, files2String, count2);
+	            ignoreTextChanged = false;
+			}
+		});
 		uniq2.setText("uniq");
 		uniq2.setFont(SWTResourceManager.getFont(".SF NS Text", 9, SWT.NORMAL));
 		uniq2.setBounds(646, 71, 56, 20);
@@ -356,14 +496,20 @@ public class MainWindow {
 	}
 
 	/**
-	 * Helper functions
-	 * 
-	 * search files given path
+	 * Helper functions 
+	 */
+	
+	/**
+	 * Search files given path 
 	 */
 	private List<String> getFilesGivenDir(Text path, Text file, List<String> filesString, Label count, String ext)
     {
         ignoreTextChanged = true;
         String dirName = path.getText().trim();
+        if (dirName.equals("")) {
+        	ignoreTextChanged = false;
+            return filesString;
+        }
         File dir = new File(dirName);
         if (dir.exists())
         {            
@@ -374,7 +520,7 @@ public class MainWindow {
         			);
         	filesString = new ArrayList<String> ();
         	for (File f : files) {
-        		filesString.add(f.getName());
+        		filesString.add(f.getPath());
         	}
         	            
             file.setText(String.join("\n", filesString));
@@ -388,8 +534,70 @@ public class MainWindow {
         return filesString;
     }
 	
-	/*
-	 * 
+	/**
+	 * Remove path 
+	 */
+	private List<String> getFileNames(Text file, List<String> filesString)
+    {
+        if (filesString != null)
+        {
+        	ArrayList<String> filesNoPath = new ArrayList<String> ();
+        	for (String s : filesString) {
+        		filesNoPath.add(FilenameUtils.getName(s));
+        	}            
+            file.setText(String.join("\n", filesNoPath));
+            filesString = filesNoPath;
+        }
+        return filesString;
+    }
+	
+	/**
+	 * Get base name 
+	 */
+	private List<String> getBasenames(Text file, List<String> filesString)
+    {
+        if (filesString != null)
+        {            
+            ArrayList<String> filesNoPath = new ArrayList<String> ();
+        	for (String s : filesString) {
+        		filesNoPath.add(FilenameUtils.getBaseName(s));
+        	}            
+            file.setText(String.join("\n", filesNoPath));
+            filesString = filesNoPath;
+        }
+        return filesString;
+    }
+	
+	/**
+	 * Sort 
+	 */
+	private List<String> sortFiles(Text file, List<String> filesString) 
+    {
+        if (filesString != null)
+        {
+        	Collections.sort(filesString);
+        	file.setText(String.join("\n", filesString));
+        }
+        return filesString;
+    }
+	
+	/**
+	 * Remove duplicated lines 
+	 */
+	private List<String> uniqFiles(Text file, List<String> filesString, Label count) 
+    {
+        if (filesString != null)
+        {
+        	HashSet<String> tmp = new HashSet<String> (filesString);
+            filesString = new ArrayList<String> (tmp);
+            file.setText(String.join("\n", filesString));
+            count.setText(Integer.toString(filesString.size()));
+        }
+        return filesString;
+    }
+	
+	/**
+	 * Change content by typing 
 	 */
 	private List<String> changeFilesByTyping(Text file, List<String> filesString, Label count)
     {
@@ -403,9 +611,9 @@ public class MainWindow {
             //    filesString = file.Text.Split(new string[] { "\t" }, StringSplitOptions.None);
             
             // show the content to user anyway, but stripped all empty strings  
-            ignoreTextChanged = true;
-            file.setText(String.join("\n", filesString));
-            ignoreTextChanged = false;
+            //ignoreTextChanged = true;
+            //file.setText(String.join("\n", filesString));
+            //ignoreTextChanged = false;
             filesString =  new ArrayList<String> (filesStringTemp);
             count.setText(Integer.toString(filesString.size()));
         }
