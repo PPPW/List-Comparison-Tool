@@ -190,7 +190,7 @@ public class MainWindow {
 		
 		count1 = new Label(shlListez, SWT.NONE);
 		count1.setFont(SWTResourceManager.getFont(".SF NS Text", 10, SWT.NORMAL));
-		count1.setBounds(67, 532, 10, 13);
+		count1.setBounds(67, 532, 100, 13);
 		
 		file2 = new Text(shlListez, SWT.MULTI | SWT.BORDER | SWT.WRAP | SWT.V_SCROLL);
 		file2.addModifyListener(new ModifyListener() {
@@ -465,7 +465,7 @@ public class MainWindow {
 		
 		count2 = new Label(shlListez, SWT.NONE);
 		count2.setFont(SWTResourceManager.getFont(".SF NS Text", 10, SWT.NORMAL));
-		count2.setBounds(424, 532, 10, 13);
+		count2.setBounds(424, 532, 100, 13);
 		
 		inBothLabel = new Label(shlListez, SWT.NONE);
 		inBothLabel.setFont(SWTResourceManager.getFont(".SF NS Text", 10, SWT.NORMAL));
@@ -483,15 +483,15 @@ public class MainWindow {
 		
 		countInBoth = new Label(shlListez, SWT.NONE);
 		countInBoth.setFont(SWTResourceManager.getFont(".SF NS Text", 10, SWT.NORMAL));
-		countInBoth.setBounds(717, 71, 10, 13);
+		countInBoth.setBounds(717, 71, 50, 13);
 		
 		countOnlyA = new Label(shlListez, SWT.NONE);
 		countOnlyA.setFont(SWTResourceManager.getFont(".SF NS Text", 10, SWT.NORMAL));
-		countOnlyA.setBounds(712, 239, 10, 13);
+		countOnlyA.setBounds(712, 239, 50, 13);
 		
 		countOnlyB = new Label(shlListez, SWT.NONE);
 		countOnlyB.setFont(SWTResourceManager.getFont(".SF NS Text", 10, SWT.NORMAL));
-		countOnlyB.setBounds(712, 409, 10, 13);
+		countOnlyB.setBounds(712, 409, 50, 13);
 
 	}
 
