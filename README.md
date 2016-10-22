@@ -1,11 +1,30 @@
 # Introduction
 
-Need to compare two lists? Need to compare files in two directories? Need to find duplicated and unique items in one list? Need to extract fields from a list? ListEZ is a graphical tool for doing these kind of jobs. 
+* Need to compare two lists? 
+
+* Need to find duplicated and unique items in one list? 
+
+* Need to compare files of certain type in two directories? 
+
+* Need to extract fields from a list? 
+
+ListEZ is a tool for doing these kind of jobs. 
 
 # Usage
 
-Double click: ./bin/Debug/ListEZ.exe
+## Java version:
+Run: ./Java/ListEZ.jar
+E.g., on Mac: 
+java -XstartOnFirstThread -jar ListEZ.jar
 
+Note: 
+* need Java version 1.8. 
+* If you run on Windows, need to include the correct version of SWT.jar for your system. 
+
+## C# version:
+In Windows system, double click: ./C#/bin/Debug/ListEZ.exe
+
+## Screenshots:
 ![Check duplicated items](./image/checkDups.png)
 ![Compare two lists](./image/compare.png)
 
