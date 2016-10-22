@@ -13,12 +13,12 @@ ListEZ is a tool for doing these kind of jobs.
 # Usage
 
 ## Java version:
-Run: ./Java/ListEZ.jar
-E.g., on Mac: 
+Run: ./Java/ListEZ.jar    
+E.g., on Mac:     
 java -XstartOnFirstThread -jar ListEZ.jar
 
-Note: 
-* need Java version 1.8. 
+Note:     
+* need Java version 1.8.    
 * If you run on Windows, need to include the correct version of SWT.jar for your system. 
 
 ## C# version:
